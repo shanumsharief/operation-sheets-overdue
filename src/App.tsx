@@ -881,7 +881,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="level-screen lyric-level-two">
       <div className="lyric-room">
-
         <header className="lyric-header">
           <span>MISSION 02 // MUSIC ARCHIVE</span>
           <strong>BABYMONSTER</strong>
@@ -890,14 +889,12 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
 
         <div className="dvd-section">
           <div className="dvd-player">
-
             <div className="dvd-label">
               <span>RETRO DISC PLAYER</span>
               <span>BM-018</span>
             </div>
 
             <div className="dvd-screen">
-
               <div className="dvd-disc">
                 <div className="disc-inner">
                   <span>BM</span>
@@ -911,7 +908,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
                   TRACK {String(matched.length + 1).padStart(2, '0')}
                 </small>
               </div>
-
             </div>
 
             <div className="dvd-controls">
@@ -921,7 +917,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
               <span>▶▶</span>
               <small>DISC SPINNING...</small>
             </div>
-
           </div>
         </div>
 
@@ -971,14 +966,12 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
         </div>
 
         <div className="album-section">
-
           <div className="album-section-title">
             <span>YOUR ALBUM COLLECTION</span>
             <span>DROP ZONES ↓</span>
           </div>
 
           <div className="album-grid">
-
             {albums.map((album) => {
               const albumMatches = matched.filter(
                 (id) =>
@@ -1004,7 +997,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
                   }}
                   onClick={() => matchAlbum(album.id)}
                 >
-
                   <div className="album-art">
                     <span className="album-art-symbol">✦</span>
                     <strong>{album.title}</strong>
@@ -1022,11 +1014,9 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
                   <span className="album-progress">
                     {albumMatches}/2 MATCHED
                   </span>
-
                 </button>
               );
             })}
-
           </div>
         </div>
 
@@ -1034,7 +1024,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
           <span>OPERATION: LOST LYRICS</span>
           <span>KEEP THE MUSIC PLAYING ♪</span>
         </div>
-
       </div>
     </div>
   );
@@ -1087,7 +1076,12 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
   });
 
   function placePart(slot: ModelSlot) {
-    if (!selectedPart || complete || placed.includes(slot)) return;
+    if (placed.includes(slot) || complete) return;
+
+    if (!selectedPart) {
+      setFeedback('SELECT A CONSTRUCTION PIECE FIRST!');
+      return;
+    }
 
     const nextSlot = order[placed.length];
 
@@ -1159,30 +1153,38 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
     );
   }
 
+  const slotStyle: React.CSSProperties = {
+    position: 'absolute',
+    zIndex: 50,
+    pointerEvents: 'auto',
+    touchAction: 'manipulation',
+    cursor: 'pointer',
+  };
+
+  const slotContentStyle: React.CSSProperties = {
+    pointerEvents: 'none',
+  };
+
   return (
     <div className="level-screen level-three">
       <div className="architecture-game">
-
-        {/* HEADER */}
-
         <div className="architecture-header">
           <span>MISSION 03 // ARCHITECTURE STUDIO</span>
           <strong>THE FINAL MODEL</strong>
           <span>{placed.length}/4 COMPONENTS</span>
         </div>
 
-        {/* BLUEPRINT AND MODEL */}
-
         <div className="blueprint-section">
-
           <div className="blueprint-heading">
             <span>PROJECT 018 — MINIATURE STRUCTURE</span>
             <span>ASSEMBLY VIEW</span>
           </div>
 
-          <div className="model-canvas">
-
-            <div className="blueprint-grid" />
+          <div className="model-canvas" style={{ position: 'relative' }}>
+            <div
+              className="blueprint-grid"
+              style={{ pointerEvents: 'none' }}
+            />
 
             <div className="blueprint-note note-top">
               FRONT ELEVATION
@@ -1196,18 +1198,25 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
 
             <button
               type="button"
+              aria-label="Place roof"
               className={`model-slot roof-slot ${
                 placed.includes('roof') ? 'slot-filled' : ''
               }`}
-              onClick={() => placePart('roof')}
+              style={{ ...slotStyle, zIndex: 54 }}
+              onClick={(event) => {
+                event.stopPropagation();
+                placePart('roof');
+              }}
               disabled={placed.includes('roof')}
             >
               {placed.includes('roof') ? (
-                <div className="building-roof">
+                <div className="building-roof" style={slotContentStyle}>
                   <span />
                 </div>
               ) : (
-                <span className="slot-label">04 · ROOF</span>
+                <span className="slot-label" style={slotContentStyle}>
+                  04 · ROOF
+                </span>
               )}
             </button>
 
@@ -1215,19 +1224,26 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
 
             <button
               type="button"
+              aria-label="Place round arch"
               className={`model-slot arch-slot ${
                 placed.includes('arch') ? 'slot-filled' : ''
               }`}
-              onClick={() => placePart('arch')}
+              style={{ ...slotStyle, zIndex: 53 }}
+              onClick={(event) => {
+                event.stopPropagation();
+                placePart('arch');
+              }}
               disabled={placed.includes('arch')}
             >
               {placed.includes('arch') ? (
-                <div className="building-arch">
+                <div className="building-arch" style={slotContentStyle}>
                   <div className="arch-opening" />
                   <div className="arch-keystone" />
                 </div>
               ) : (
-                <span className="slot-label">03 · ARCH</span>
+                <span className="slot-label" style={slotContentStyle}>
+                  03 · ARCH
+                </span>
               )}
             </button>
 
@@ -1235,19 +1251,26 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
 
             <button
               type="button"
+              aria-label="Place columns"
               className={`model-slot columns-slot ${
                 placed.includes('columns') ? 'slot-filled' : ''
               }`}
-              onClick={() => placePart('columns')}
+              style={{ ...slotStyle, zIndex: 52 }}
+              onClick={(event) => {
+                event.stopPropagation();
+                placePart('columns');
+              }}
               disabled={placed.includes('columns')}
             >
               {placed.includes('columns') ? (
-                <div className="building-columns">
+                <div className="building-columns" style={slotContentStyle}>
                   <i />
                   <i />
                 </div>
               ) : (
-                <span className="slot-label">02 · COLUMNS</span>
+                <span className="slot-label" style={slotContentStyle}>
+                  02 · COLUMNS
+                </span>
               )}
             </button>
 
@@ -1255,25 +1278,37 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
 
             <button
               type="button"
+              aria-label="Place foundation"
               className={`model-slot foundation-slot ${
                 placed.includes('foundation') ? 'slot-filled' : ''
               }`}
-              onClick={() => placePart('foundation')}
+              style={{ ...slotStyle, zIndex: 51 }}
+              onClick={(event) => {
+                event.stopPropagation();
+                placePart('foundation');
+              }}
               disabled={placed.includes('foundation')}
             >
               {placed.includes('foundation') ? (
-                <div className="building-foundation">
+                <div
+                  className="building-foundation"
+                  style={slotContentStyle}
+                >
                   <span>MODEL BASE</span>
                 </div>
               ) : (
-                <span className="slot-label">01 · FOUNDATION</span>
+                <span className="slot-label" style={slotContentStyle}>
+                  01 · FOUNDATION
+                </span>
               )}
             </button>
 
-            <div className="blueprint-measurement">
+            <div
+              className="blueprint-measurement"
+              style={{ pointerEvents: 'none' }}
+            >
               ───── 120 mm ─────
             </div>
-
           </div>
 
           <div className="blueprint-status">
@@ -1288,8 +1323,6 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
             </div>
           </div>
         </div>
-
-        {/* INSTRUCTIONS */}
 
         <div className="architecture-instruction">
           <span className="eyebrow">
@@ -1323,10 +1356,7 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
           </p>
         </div>
 
-        {/* CONSTRUCTION PIECES */}
-
         <div className="construction-tray">
-
           <div className="tray-heading">
             <span>CONSTRUCTION MATERIALS</span>
             <small>SELECT A PIECE, THEN TAP ITS SLOT</small>
@@ -1337,6 +1367,7 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
               <button
                 type="button"
                 key={piece.id}
+                aria-pressed={selectedPart === piece.id}
                 className={`construction-piece piece-${piece.id} ${
                   selectedPart === piece.id ? 'piece-selected' : ''
                 }`}
@@ -1374,8 +1405,6 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
           </div>
         </div>
 
-        {/* FEEDBACK */}
-
         {feedback && (
           <div
             className={`architecture-feedback ${
@@ -1390,7 +1419,6 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
           <span>ARCHITECTURE STUDIO</span>
           <span>ONE PIECE AT A TIME ✦</span>
         </div>
-
       </div>
     </div>
   );
