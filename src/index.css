@@ -4737,3 +4737,74 @@ button:focus-visible { outline: 3px solid #f6d58a; outline-offset: 3px; }
     font-size: 10px;
   }
 }
+
+/* LEVEL 03 — SEPARATE MODEL PLACEMENT ZONES */
+
+.model-canvas {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Common placement slot styling */
+.model-canvas > .model-slot {
+  position: absolute !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translateX(-50%) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+/* 04 — ROOF: topmost section */
+.model-canvas > .roof-slot {
+  top: 7% !important;
+  width: 76%;
+  height: 14%;
+  z-index: 54;
+}
+
+/* 03 — ARCH: separate section above columns */
+.model-canvas > .arch-slot {
+  top: 25% !important;
+  width: 62%;
+  height: 18%;
+  z-index: 53;
+}
+
+/* 02 — COLUMNS: separate section below arch */
+.model-canvas > .columns-slot {
+  top: 47% !important;
+  width: 62%;
+  height: 20%;
+  z-index: 52;
+}
+
+/* 01 — FOUNDATION: bottom section */
+.model-canvas > .foundation-slot {
+  top: 72% !important;
+  width: 78%;
+  height: 17%;
+  z-index: 51;
+}
+
+/* Keep decorative blueprint elements from blocking clicks */
+.model-canvas .blueprint-grid,
+.model-canvas .blueprint-note,
+.model-canvas .blueprint-measurement {
+  pointer-events: none;
+}
+
+/* Keep the placed illustrations inside their own zones */
+.model-canvas .building-roof,
+.model-canvas .building-arch,
+.model-canvas .building-columns,
+.model-canvas .building-foundation {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
