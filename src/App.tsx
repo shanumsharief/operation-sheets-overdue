@@ -5,7 +5,6 @@ import {
   Backpack,
   Check,
   ChevronRight,
-  CircleHelp,
   Cloud,
   Gift,
   House,
@@ -889,8 +888,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
           <span>{matched.length}/8 MATCHED</span>
         </header>
 
-        {/* DVD PLAYER */}
-
         <div className="dvd-section">
           <div className="dvd-player">
 
@@ -927,8 +924,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
 
           </div>
         </div>
-
-        {/* LYRIC CARD */}
 
         <div className="lyric-instruction">
           <span className="eyebrow">YOUR CURRENT CLUE</span>
@@ -974,8 +969,6 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
             </div>
           )}
         </div>
-
-        {/* ALBUM DROP ZONES */}
 
         <div className="album-section">
 
@@ -1047,16 +1040,9 @@ function LevelTwo({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-
 /* LEVEL 03 — THE FINAL MODEL */
 
-type ModelPart =
-  | 'foundation'
-  | 'columns'
-  | 'round-arch'
-  | 'pointed-arch'
-  | 'horseshoe-arch'
-  | 'roof';
+type ModelPart = 'foundation' | 'columns' | 'round-arch' | 'roof';
 
 type ModelSlot = 'foundation' | 'columns' | 'arch' | 'roof';
 
@@ -1075,10 +1061,8 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
   }[] = [
     { id: 'foundation', label: 'FOUNDATION', number: '01' },
     { id: 'columns', label: 'COLUMNS', number: '02' },
-    { id: 'pointed-arch', label: 'POINTED ARCH', number: '03' },
-    { id: 'round-arch', label: 'ROUND ARCH', number: '04' },
-    { id: 'horseshoe-arch', label: 'HORSESHOE ARCH', number: '05' },
-    { id: 'roof', label: 'ROOF', number: '06' },
+    { id: 'round-arch', label: 'ROUND ARCH', number: '03' },
+    { id: 'roof', label: 'ROOF', number: '04' },
   ];
 
   const order: ModelSlot[] = [
@@ -1096,40 +1080,26 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
   };
 
   const remainingPieces = pieces.filter((piece) => {
-    if (piece.id === 'foundation' && placed.includes('foundation')) return false;
-    if (piece.id === 'columns' && placed.includes('columns')) return false;
-    if (
-      ['round-arch', 'pointed-arch', 'horseshoe-arch'].includes(piece.id) &&
-      placed.includes('arch')
-    ) return false;
-    if (piece.id === 'roof' && placed.includes('roof')) return false;
+    const matchingSlot: ModelSlot =
+      piece.id === 'round-arch' ? 'arch' : piece.id;
 
-    return true;
+    return !placed.includes(matchingSlot);
   });
 
-  function placePart(slot: ModelSlot, part: ModelPart | null) {
-    if (!part || complete || placed.includes(slot)) return;
+  function placePart(slot: ModelSlot) {
+    if (!selectedPart || complete || placed.includes(slot)) return;
 
     const nextSlot = order[placed.length];
 
     if (slot !== nextSlot) {
       setFeedback('FOLLOW THE BLUEPRINT. BUILD FROM THE BOTTOM UP!');
-      setSelectedPart(null);
       return;
     }
 
-    if (requiredPieces[slot] !== part) {
-      setFeedback(
-        slot === 'arch'
-          ? 'NOT THIS ONE! CHECK THE ARCH SHAPE ON THE BLUEPRINT.'
-          : 'THAT PIECE DOES NOT FIT HERE. TRY AGAIN!'
-      );
-      setSelectedPart(null);
+    if (requiredPieces[slot] !== selectedPart) {
+      setFeedback('THAT PIECE DOES NOT FIT HERE. TRY AGAIN!');
       return;
     }
-
-    setPlaced((current) => [...current, slot]);
-    setSelectedPart(null);
 
     const messages: Record<ModelSlot, string> = {
       foundation: '✓ FOUNDATION PLACED!',
@@ -1138,37 +1108,16 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
       roof: '✓ ROOF PLACED! THE MODEL IS COMPLETE!',
     };
 
+    setPlaced((current) => [...current, slot]);
+    setSelectedPart(null);
     setFeedback(messages[slot]);
-  }
-
-  function handleDrop(
-    event: React.DragEvent<HTMLButtonElement>,
-    slot: ModelSlot
-  ) {
-    event.preventDefault();
-
-    const part = event.dataTransfer.getData('text/plain') as ModelPart;
-
-    placePart(slot, part || selectedPart);
-  }
-
-  function slotProps(slot: ModelSlot) {
-    return {
-      onDragOver: (event: React.DragEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        event.dataTransfer.dropEffect = 'move';
-      },
-      onDrop: (event: React.DragEvent<HTMLButtonElement>) =>
-        handleDrop(event, slot),
-      onClick: () => placePart(slot, selectedPart),
-    };
   }
 
   if (!started) {
     return (
       <MissionIntro
         title="THE FINAL MODEL"
-        text="The blueprint is ready, but the building is unfinished. Drag the construction pieces into place, complete the arch challenge and finish the model!"
+        text="The blueprint is ready, but the building is unfinished. Select four construction pieces and place them in the correct order to complete the model!"
         onContinue={() => setStarted(true)}
       />
     );
@@ -1246,10 +1195,12 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
             {/* ROOF SLOT */}
 
             <button
+              type="button"
               className={`model-slot roof-slot ${
                 placed.includes('roof') ? 'slot-filled' : ''
               }`}
-              {...slotProps('roof')}
+              onClick={() => placePart('roof')}
+              disabled={placed.includes('roof')}
             >
               {placed.includes('roof') ? (
                 <div className="building-roof">
@@ -1263,10 +1214,12 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
             {/* ARCH SLOT */}
 
             <button
+              type="button"
               className={`model-slot arch-slot ${
                 placed.includes('arch') ? 'slot-filled' : ''
               }`}
-              {...slotProps('arch')}
+              onClick={() => placePart('arch')}
+              disabled={placed.includes('arch')}
             >
               {placed.includes('arch') ? (
                 <div className="building-arch">
@@ -1281,10 +1234,12 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
             {/* COLUMNS SLOT */}
 
             <button
+              type="button"
               className={`model-slot columns-slot ${
                 placed.includes('columns') ? 'slot-filled' : ''
               }`}
-              {...slotProps('columns')}
+              onClick={() => placePart('columns')}
+              disabled={placed.includes('columns')}
             >
               {placed.includes('columns') ? (
                 <div className="building-columns">
@@ -1299,10 +1254,12 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
             {/* FOUNDATION SLOT */}
 
             <button
+              type="button"
               className={`model-slot foundation-slot ${
                 placed.includes('foundation') ? 'slot-filled' : ''
               }`}
-              {...slotProps('foundation')}
+              onClick={() => placePart('foundation')}
+              disabled={placed.includes('foundation')}
             >
               {placed.includes('foundation') ? (
                 <div className="building-foundation">
@@ -1332,7 +1289,7 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
           </div>
         </div>
 
-        {/* ARCHITECTURE PUZZLE INSTRUCTION */}
+        {/* INSTRUCTIONS */}
 
         <div className="architecture-instruction">
           <span className="eyebrow">
@@ -1341,7 +1298,7 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
               : placed.length === 1
                 ? 'STEP 02'
                 : placed.length === 2
-                  ? 'STEP 03 — ARCH CHALLENGE'
+                  ? 'STEP 03'
                   : 'STEP 04'}
           </span>
 
@@ -1351,29 +1308,19 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
               : placed.length === 1
                 ? 'ADD THE SUPPORTING COLUMNS'
                 : placed.length === 2
-                  ? 'WHICH ARCH BELONGS HERE?'
+                  ? 'PLACE THE ROUND ARCH'
                   : 'FINISH IT WITH THE ROOF'}
           </h2>
 
           <p>
             {placed.length === 0
-              ? 'Drag the base piece onto the bottom of your blueprint.'
+              ? 'Select the foundation piece below, then tap the bottom slot.'
               : placed.length === 1
-                ? 'The foundation is ready. Place the two supporting columns.'
+                ? 'Select the columns and place them above the foundation.'
                 : placed.length === 2
-                  ? 'The blueprint calls for a semicircular arch. Choose the correct shape.'
-                  : 'One final piece! Place the roof to complete your model.'}
+                  ? 'Select the single semicircular arch and place it above the columns.'
+                  : 'Select the final roof piece and place it at the top.'}
           </p>
-
-          {placed.length === 2 && (
-            <div className="arch-reference">
-              <span>BLUEPRINT DETAIL</span>
-              <div className="reference-round-arch">
-                <div />
-              </div>
-              <strong>SEMICIRCULAR ARCH REQUIRED</strong>
-            </div>
-          )}
         </div>
 
         {/* CONSTRUCTION PIECES */}
@@ -1382,24 +1329,17 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
 
           <div className="tray-heading">
             <span>CONSTRUCTION MATERIALS</span>
-            <small>DRAG A PIECE TO THE BLUEPRINT</small>
+            <small>SELECT A PIECE, THEN TAP ITS SLOT</small>
           </div>
 
           <div className="construction-pieces">
             {remainingPieces.map((piece) => (
               <button
+                type="button"
                 key={piece.id}
-                draggable
                 className={`construction-piece piece-${piece.id} ${
                   selectedPart === piece.id ? 'piece-selected' : ''
                 }`}
-                onDragStart={(event) => {
-                  event.dataTransfer.setData('text/plain', piece.id);
-                  event.dataTransfer.effectAllowed = 'move';
-                  setSelectedPart(piece.id);
-                  setFeedback('');
-                }}
-                onDragEnd={() => setSelectedPart(null)}
                 onClick={() => {
                   setSelectedPart(piece.id);
                   setFeedback(`SELECTED: ${piece.label}. NOW TAP ITS SLOT.`);
@@ -1421,14 +1361,6 @@ function LevelThree({ onComplete }: { onComplete: () => void }) {
 
                   {piece.id === 'round-arch' && (
                     <span className="mini-arch round" />
-                  )}
-
-                  {piece.id === 'pointed-arch' && (
-                    <span className="mini-arch pointed" />
-                  )}
-
-                  {piece.id === 'horseshoe-arch' && (
-                    <span className="mini-arch horseshoe" />
                   )}
 
                   {piece.id === 'roof' && (
@@ -1526,7 +1458,7 @@ function Reward({
           I'LL GET THE
           <br />
           MODEL DONE FOR YOU.
-          <br /> 
+          <br />
           (+ ONE MORE ASSIGNMENT WHENEVER YOU WANT ME TO.)
         </div>
 
